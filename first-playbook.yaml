@@ -1,0 +1,14 @@
+- name: Ansible playbook
+  hosts: servers
+  gather_facts: true
+  remote_user: ubuntu
+  tasks:
+    - name: Print a message
+      debug:
+        var: ansible_facts['lsb']['id']
+    - name: update apt cache
+      apt:
+        update_cache: yes
+      become: yes
+    
+    

@@ -1,0 +1,66 @@
+- name: Install Docker
+  hosts: servers
+  gather_facts: true
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      become: yes
+
+    - name: Install required packages
+      apt:  # Use 'apt' instead of 'package' for Debian-based systems
+        name:
+          - ca-certificates
+          - curl
+        state: present
+      become: yes
+    - name: Ensure Keyrings directory exists
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+      become: true
+    - name: Add Docker GPG key
+      get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+      become: true
+      
+    - name: Add APT repo 
+      apt_repository:
+        repo: 'deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu focal stable'
+        state: present
+      become: true
+
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+      become: yes
+
+    - name: Install Docker necessary packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+      become: true 
+    - name: Make sure Docker is running
+      systemd_service:
+        name: docker
+        state: started
+        enabled: yes
+      become: true
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+      become: true
+ 
+
+ 
+
