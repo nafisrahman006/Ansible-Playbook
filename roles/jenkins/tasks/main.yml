@@ -1,0 +1,42 @@
+
+- name: Download Jenkins GPG key
+  ansible.builtin.get_url:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    dest: /usr/share/keyrings/jenkins-keyring.asc
+    mode: '0644'
+  become: true
+- name: update apt cache
+  apt:
+    update_cache: yes
+  become: true
+
+- name: Add APT repo 
+  apt_repository:
+    repo: deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] https://pkg.jenkins.io/debian-stable binary/
+    state: present
+  become: true
+
+- name: update apt cache
+  apt:
+    update_cache: yes
+  become: true
+- name: Install necessary packages
+  apt:
+    name: jenkins={{ jenkins_version }}
+    state: present
+  become: true
+- name: Make sure Jenkins is running
+  systemd_service:
+    name: jenkins
+    state: started
+
+- name: Make sure jenkins is running
+  systemd_service:
+    name: jenkins
+    state: started
+
+- name: Wait for jenkins server to be rechable
+  wait_for:
+    port: "{{ jenkins_port }}"
+    delay: 40
+    timeout: 300

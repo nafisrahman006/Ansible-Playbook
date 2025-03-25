@@ -1,0 +1,16 @@
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: yes
+
+- name: Install Java
+  apt:
+    name: "{{ java_version }}"
+    state: present
+  become: yes
+- name: check java version
+  ansible.builtin.shell: java -version 
+- name: Ensure Java is installed
+  ansible.builtin.debug:
+    msg: "Java is installed"
+  
